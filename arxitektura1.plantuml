@@ -1,0 +1,149 @@
+@startuml
+
+skinparam backgroundImage "background.png"
+skinparam backgroundColor transparent
+
+skinparam defaultTextAlignment center
+skinparam shadowing false
+
+' ======= DARK THEME COLORS =======
+
+skinparam rectangle {
+    BackgroundColor #1E1E1E
+    BorderColor #777777
+    FontColor #EEEEEE
+    RoundCorner 12
+}
+
+skinparam package {
+    BackgroundColor #252525
+    BorderColor #AAAAAA
+    FontColor #FFFFFF
+}
+
+skinparam note {
+    BackgroundColor #333333
+    BorderColor #AAAAAA
+    FontColor #EEEEEE
+}
+
+skinparam arrowColor #DDDDDD
+skinparam arrowFontColor #FFFFFF  ' Белый цвет для текста стрелок
+skinparam title {
+    FontColor #FFFFFF
+}
+
+' Белый цвет для названий пакетов
+skinparam packageFontColor #FFFFFF
+
+title Архитектура децентрализованной P2P Web3 IPv6 сети
+
+' =====================================================
+'                 APPLICATION LAYER
+' =====================================================
+
+package "Прикладные модули" {
+    [Messaging Module] as MSG
+    [Streaming Module] as STREAM
+    [File Transfer Module] as FILES
+    [IoT Module] as IOT
+}
+
+' =====================================================
+'                    CORE NODE
+' =====================================================
+
+package "Узел сети (Node)" {
+    [Identity Manager] as IDM
+    [Crypto Engine] as CRYPTO
+    [P2P Overlay] as OVERLAY
+    [Transport Layer] as TL
+    [DHT Client] as DHT
+    [Blockchain Connector] as BC
+}
+
+' =====================================================
+'                 INFRASTRUCTURE LAYER
+' =====================================================
+
+package "Инфраструктура" {
+    [Blockchain Network] as CHAIN
+    [DHT Network] as DHTNET
+    [Fallback Relay / TURN] as RELAY
+}
+
+' =====================================================
+'           APPLICATION → OVERLAY
+' =====================================================
+
+MSG --> OVERLAY : обмен\nсообщениями
+STREAM --> OVERLAY : потоковое\nвидео
+FILES --> OVERLAY : передача\nфайлов
+IOT --> OVERLAY : IoT-команды\n/ телеметрия
+
+' =====================================================
+'                 CORE NODE RELATIONS
+' =====================================================
+
+IDM --> CRYPTO : генерирует ключи\nи подписывает данные
+IDM --> BC : регистрация\nидентичности
+
+OVERLAY --> DHT : чтение/запись\nPeerRecord
+OVERLAY --> CRYPTO : Noise handshake
+CRYPTO --> TL : защищённые пакеты
+OVERLAY --> TL : p2p-каналы
+
+TL --> RELAY : fallback\nпри отсутствии IPv6
+DHT --> DHTNET : запросы,\nпубликации
+BC --> CHAIN : подтверждение\nидентичностей
+
+' =====================================================
+'                     NOTES
+' =====================================================
+
+note top of IDM
+1. Генерация ключей (Ed25519)
+2. NodeID = hash(pubkey)
+3. Подпись пакетов
+end note
+
+note right of DHT
+Записи узлов:
+- NodeID
+- IPv6 адреса
+- Транспорты
+- TTL и статус
+end note
+
+note right of TL
+Поддержка транспортов:
+- IPv6 Direct
+- UDP Hole Punching
+- QUIC / TCP
+- WebRTC ICE
+- Relay fallback
+end note
+
+note bottom of MSG
+Надёжные очереди,
+ACK, шифрование.
+end note
+
+note bottom of STREAM
+RTP/QUIC
+адаптивный битрейт.
+end note
+
+note bottom of FILES
+Передача по частям,
+хеши блоков,
+целостность.
+end note
+
+note bottom of IOT
+MCU-friendly,
+минимальный трафик,
+энергосбережение.
+end note
+
+@enduml
