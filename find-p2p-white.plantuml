@@ -1,0 +1,79 @@
+@startuml
+skinparam dpi 300
+skinparam defaultFontSize 22
+scale 0.85
+hide footbox
+
+skinparam backgroundColor #FFFFFF
+
+skinparam sequence {
+    ArrowColor #333333
+    LifeLineBorderColor #888888
+    LifeLineBackgroundColor #FFFFFF
+    ParticipantBorderColor #444444
+    ParticipantBackgroundColor #F5F5F5
+    FontColor #000000
+}
+
+skinparam note {
+    BackgroundColor #FAFAFA
+    BorderColor #888888
+    FontColor #000000
+}
+
+skinparam title {
+    FontColor #000000
+}
+
+title Установление P2P-соединения
+
+actor "Узел A" as A
+participant "DHT" as DHT
+participant "Blockchain" as BC
+actor "Узел B" as B
+participant "Relay" as R
+
+== Поиск узла ==
+A -> DHT : lookup(NodeID B)
+DHT --> A : EndpointRecord
+
+note over A
+IPv6, транспорты,
+pubkey, TTL
+end note
+
+== Проверка ключа ==
+A -> BC : verify(NodeID B)
+BC --> A : ok
+
+== Соединение ==
+A -> B : IPv6 connect
+alt прямой канал
+    B --> A : connected
+else fallback
+    A -> B : UDP punch
+    alt success
+        B --> A : connected
+    else
+        A -> R : relay
+        R -> B
+        B --> A
+    end
+end
+
+== Handshake ==
+A -> B : Noise
+B --> A : confirm
+
+note bottom
+Зашифрованный канал,
+аутентификация,
+защита от MITM
+end note
+
+== Данные ==
+A -> B : encrypted data
+B --> A : ACK
+
+@enduml
+

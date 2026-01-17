@@ -1,0 +1,126 @@
+@startuml
+!pragma layout smetana
+left to right direction
+
+skinparam dpi 300
+skinparam defaultFontSize 22
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+skinparam shadowing false
+
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #333333
+    FontColor #000000
+    RoundCorner 8
+}
+
+skinparam package {
+    BackgroundColor #F5F5F5
+    BorderColor #333333
+    FontColor #000000
+}
+
+skinparam note {
+    BackgroundColor #FFFFFF
+    BorderColor #666666
+    FontColor #000000
+}
+
+skinparam arrowColor #333333
+skinparam arrowFontColor #000000
+
+skinparam title {
+    FontColor #000000
+}
+
+skinparam packageFontColor #000000
+
+title Архитектура децентрализованной P2P Web3 IPv6 сети
+
+' =====================================================
+'                APPLICATION LAYER
+' =====================================================
+
+package "Прикладные модули" {
+    rectangle "Messaging" as MSG
+    rectangle "Streaming" as STREAM
+    rectangle "File Transfer" as FILES
+    rectangle "IoT" as IOT
+}
+
+' =====================================================
+'                   CORE NODE
+' =====================================================
+
+package "Узел сети (Node)" {
+    rectangle "P2P Overlay" as OVERLAY
+    rectangle "Identity Manager" as IDM
+    rectangle "Crypto Engine" as CRYPTO
+    rectangle "Transport Layer" as TL
+    rectangle "DHT Client" as DHT
+    rectangle "Blockchain Connector" as BC
+}
+
+' =====================================================
+'                NETWORK INFRASTRUCTURE
+' =====================================================
+
+package "Инфраструктура сети" {
+    rectangle "DHT Network" as DHTNET
+    rectangle "Blockchain Network" as CHAIN
+    rectangle "Relay / TURN" as RELAY
+}
+
+' =====================================================
+'           APPLICATION → OVERLAY
+' =====================================================
+
+MSG --> OVERLAY
+STREAM --> OVERLAY
+FILES --> OVERLAY
+IOT --> OVERLAY
+
+' =====================================================
+'               CORE NODE INTERNAL
+' =====================================================
+
+IDM --> CRYPTO : ключи и подписи
+CRYPTO --> TL : шифрование
+OVERLAY --> TL : p2p-каналы
+
+OVERLAY --> DHT : lookup / publish
+DHT --> DHTNET
+
+IDM --> BC : identity proof
+BC --> CHAIN : anchor / verify
+
+' =====================================================
+'         INFRASTRUCTURE ↔ NODE INTERACTION
+' =====================================================
+
+CHAIN --> BC : проверка\nподлинности
+DHTNET --> DHT : peer records
+
+TL --> RELAY : fallback\nпри отсутствии прямого канала
+
+' =====================================================
+'                     NOTES
+' =====================================================
+
+note right of DHTNET
+Off-chain обнаружение:
+- адреса узлов
+- транспорты
+- TTL
+end note
+
+note right of CHAIN
+On-chain доверие:
+- якорь идентичности
+- доказательство факта
+- защита от подмены
+end note
+
+@enduml
+
