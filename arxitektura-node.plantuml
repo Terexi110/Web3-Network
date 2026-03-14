@@ -1,0 +1,48 @@
+@startuml
+title Архитектура узла сети
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+package "Узел сети" {
+  [DID / Key Manager] as DID
+  [Name Resolver] as NAME
+  [P2P Transport] as P2P
+  [Relay / NAT Traversal] as NAT
+  [Kad-DHT] as DHT
+  [WIDAG Engine] as DAG
+  [Local Event Journal] as JOURNAL
+  [Blob Storage] as BLOB
+  [Validation Committee Logic] as VALID
+  [Conflict Resolver] as CONFLICT
+  [Checkpoint Manager] as CHECK
+  [dApp Runtime / API] as DAPP
+}
+
+cloud "Другие узлы сети" as PEERS
+cloud "Распределённая сеть" as NET
+
+DID --> NAME : идентичность
+DID --> P2P : подпись / аутентификация
+NAME --> DHT : публикация и поиск\nсетевых записей
+
+P2P --> NAT : прямое соединение /\nrelay / hole punching
+P2P --> PEERS : обмен сообщениями
+NAT --> PEERS
+
+DHT --> NET : peer discovery /\nlookup / announce
+DAG --> JOURNAL : локальные события
+DAG --> BLOB : payload по hash
+DAG --> VALID : проверка событий
+DAG --> CONFLICT : арбитраж конфликтов
+DAG --> CHECK : контрольные точки
+
+DAPP --> DAG : публикация событий
+DAPP --> DHT : поиск узлов
+DAPP --> P2P : сетевое взаимодействие
+
+VALID --> PEERS : receipts / attestations
+CONFLICT --> PEERS : конфликтный комитет
+CHECK --> PEERS : checkpoint
+
+@enduml

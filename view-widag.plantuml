@@ -1,0 +1,66 @@
+@startuml
+title Структура графа WIDAG
+
+skinparam linetype ortho
+skinparam rectangle {
+  RoundCorner 15
+}
+
+rectangle "A1\nACTION\nАвтор: DID_A" as A1
+rectangle "A2\nACTION\nАвтор: DID_A" as A2
+rectangle "A3\nACTION\nАвтор: DID_A" as A3
+
+rectangle "B1\nACTION\nАвтор: DID_B" as B1
+rectangle "B2\nACTION\nАвтор: DID_B" as B2
+
+rectangle "C1\nACTION\nАвтор: DID_C" as C1
+
+rectangle "R1\nRECEIPT\nСвидетель: W1" as R1
+rectangle "R2\nRECEIPT\nСвидетель: W2" as R2
+
+rectangle "D1\nDECISION\nРазрешение конфликта" as D1
+rectangle "CP1\nCHECKPOINT" as CP1
+
+' Личные цепочки авторов (self-link)
+A2 --> A1 : self-link
+A3 --> A2 : self-link
+B2 --> B1 : self-link
+
+' Контекстные связи (context-link)
+B1 --> A1 : context-link
+C1 --> B1 : context-link
+A3 --> C1 : context-link
+
+' Глобальные якоря (anchor-link)
+A2 --> B1 : anchor-link
+B2 --> A1 : anchor-link
+C1 --> A2 : anchor-link
+
+' Подтверждения события
+R1 --> A3 : receipt
+R2 --> A3 : receipt
+
+' Конфликт и решение
+D1 --> A3 : resolves
+D1 --> B2 : resolves
+
+' Контрольная точка
+CP1 --> A3
+CP1 --> B2
+CP1 --> C1
+CP1 --> D1
+
+legend right
+  WIDAG использует 4 типа вершин:
+  1. ACTION    — действие пользователя
+  2. RECEIPT   — подтверждение свидетеля
+  3. DECISION  — решение конфликта
+  4. CHECKPOINT — контрольная точка
+
+  Типы связей:
+  - self-link    — предыдущее действие автора
+  - context-link — предыдущее событие объекта
+  - anchor-link  — случайная стабильная вершина
+endlegend
+
+@enduml
