@@ -1,4 +1,6 @@
 @startuml
+' skinparam backgroundColor transparent
+
 title Структура графа WIDAG
 
 skinparam linetype ortho

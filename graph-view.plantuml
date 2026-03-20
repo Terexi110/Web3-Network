@@ -1,0 +1,54 @@
+@startuml
+title Структура графа WIDAG
+
+skinparam linetype ortho
+skinparam rectangle {
+  RoundCorner 15
+}
+
+rectangle "A1\nACTION\nDID_A" as A1
+rectangle "A2\nACTION\nDID_A" as A2
+
+rectangle "B1\nACTION\nDID_B" as B1
+
+rectangle "R1\nRECEIPT" as R1
+rectangle "R2\nRECEIPT" as R2
+
+rectangle "D1\nDECISION" as D1
+rectangle "CP1\nCHECKPOINT" as CP1
+
+' self-link
+A2 --> A1 : self
+
+' context-link
+B1 --> A1 : context
+
+' anchor-link
+A2 --> B1 : anchor
+
+' receipts
+R1 --> A2
+R2 --> A2
+
+' decision
+D1 --> A2
+D1 --> B1
+
+' checkpoint
+CP1 --> A2
+CP1 --> D1
+
+legend right
+  Типы вершин:
+  ACTION
+  RECEIPT
+  DECISION
+  CHECKPOINT
+
+  Связи:
+  self
+  context
+  anchor
+endlegend
+
+@enduml
